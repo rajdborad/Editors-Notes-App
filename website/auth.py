@@ -1,4 +1,5 @@
 import flask
+import flask_login
 from unicodedata import category
 from xmlrpc.client import boolean
 from flask import Blueprint, render_template, request, flash, redirect, url_for
@@ -14,20 +15,20 @@ auth = Blueprint('auth', __name__)
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
-        password = request.form.get('password')
+        password = request.form.get('password1')
 
         user = User.query.filter_by(email=email).first()
         if user:
             if check_password_hash(user.password, password):
-                flask('Logged in Successfully!..', category='success')
+                flash('Logged in successfully!', category='success')
                 login_user(user, remember=True)
                 return redirect(url_for('views.home'))
             else:
-                flash("Incorrect password, try again..", category='error')
+                flash('Incorrect password, try again.', category='error')
         else:
-            flask('Email (User) does not exist.', category='error')
+            flash('Email does not exist.', category='error')
 
-    return render_template("login.html", boolean=True)
+    return render_template("login.html", user=current_user)
 
 
 @auth.route('/logout')
@@ -67,4 +68,4 @@ def sign_up():
             flash('Account Created Successfully!...', category='success')
             return redirect(url_for('views.home'))
 
-    return render_template("sign_up.html")
+    return render_template("sign_up.html", user=current_user)
